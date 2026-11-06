@@ -4,7 +4,7 @@ import time
 from common import db
 
 
-def test_api(case, client):
+def test_api(case, client, batch):
     start = time.perf_counter()
     status = "passed"
     http_code = 0
@@ -41,4 +41,4 @@ def test_api(case, client):
         raise
     finally:
         cost_ms = round((time.perf_counter() - start) * 1000)
-        db.save_result(case["id"], status, cost_ms, http_code, message)
+        db.save_result(case["id"], status, cost_ms, http_code, message, batch)

@@ -10,4 +10,7 @@ allure-report/
 reports/
 server.log
 .idea/
-.vscode/
+# 保留 VS Code 的运行配置（F5 直接跑用例），其余本地设置忽略
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json

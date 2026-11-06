@@ -12,8 +12,9 @@ CREATE TABLE IF NOT EXISTS test_case (
 CREATE TABLE IF NOT EXISTS bug (
   bug_id     VARCHAR(32) PRIMARY KEY,
   case_id    VARCHAR(32),
-  severity   VARCHAR(16),
-  status     VARCHAR(16),                -- new / fixed / retest / closed
+  severity   VARCHAR(16),                -- P0-P4
+  status     VARCHAR(16),                -- open / fixed / closed
+  title      VARCHAR(128),               -- 一句话描述现象与预期
   created_at DATETIME,
   closed_at  DATETIME
 );
@@ -21,10 +22,11 @@ CREATE TABLE IF NOT EXISTS bug (
 CREATE TABLE IF NOT EXISTS run_result (
   id        BIGINT AUTO_INCREMENT PRIMARY KEY,
   case_id   VARCHAR(32),
-  status    VARCHAR(16),                -- passed / failed
+  status    VARCHAR(16),                 -- passed / failed
   cost_ms   INT,
   http_code INT,
   message   VARCHAR(512),
   run_at    DATETIME,
+  batch     VARCHAR(32),                 -- 执行批次号
   INDEX idx_case_run (case_id, run_at)
 );

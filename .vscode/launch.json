@@ -1,0 +1,40 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "① 运行全部用例（推荐）",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/runner.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    },
+    {
+      "name": "② 只跑冒烟用例",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/runner.py",
+      "args": ["--tag", "smoke"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "③ 一键自检",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/verify.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "④ 查看执行统计",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/report.py",
+      "args": ["--md"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

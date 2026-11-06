@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "运行全部用例",
+      "type": "shell",
+      "command": "python runner.py",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "只跑冒烟用例",
+      "type": "shell",
+      "command": "python runner.py --tag smoke",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "一键自检",
+      "type": "shell",
+      "command": "python verify.py",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "查看执行统计",
+      "type": "shell",
+      "command": "python report.py --md",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "缺陷台账",
+      "type": "shell",
+      "command": "python buglog.py list",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    }
+  ]
+}

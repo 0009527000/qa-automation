@@ -29,9 +29,15 @@ jobs:
       - name: Run regression
         run: pytest -m "smoke or regression" --alluredir=allure-results
 
+      - name: Summary report
+        if: always()
+        run: python report.py --md
+
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-results
-          path: allure-results
+          path: |
+            allure-results
+            reports

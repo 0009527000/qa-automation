@@ -1,33 +1,29 @@
-"""加载 YAML 用例、初始化结果库、注入 HTTP client，并按用例 tags 打 pytest 标记。"""
-from pathlib import Path
+"""pytest 入口：加载 YAML 用例、初始化库、注入 client、按 tags 打标记。
+
+用例读取与 runner.py 共用 common/cases.py，保证两边跑的是同一批用例。
+"""
+from datetime import datetime
 
 import pytest
-import yaml
 
+from common import cases as case_loader
 from common import db
 from common.config import API_TOKEN, BASE_URL
 from common.http_client import ApiClient
 
-ROOT = Path(__file__).resolve().parents[1]
-
-
-def load_cases():
-    cases = []
-    for path in sorted((ROOT / "cases").glob("*.yaml")):
-        with path.open(encoding="utf-8") as fh:
-            data = yaml.safe_load(fh) or {}
-        for case in data.get("cases", []):
-            case["module"] = path.stem
-            cases.append(case)
-    return cases
-
-
-CASES = load_cases()
+CASES = case_loader.load_cases()
 
 
 @pytest.fixture(scope="session", autouse=True)
 def init_database():
     db.init_db()
+    db.sync_cases(CASES)
+
+
+@pytest.fixture(scope="session")
+def batch():
+    """一轮测试共用一个批次号，便于统计「最近一次执行」的完整结果。"""
+    return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
 @pytest.fixture(scope="session")
