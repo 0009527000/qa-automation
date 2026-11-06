@@ -46,9 +46,11 @@ allure serve allure-results
 
 ### 一键自检（不想敲命令就用这个）
 
-**Windows：直接双击 `verify.bat`**；其他系统或命令行执行 `python verify.py`。
+**Windows：直接双击 `verify.bat`**；也可以在 VS Code 里右键 `verify.py` → Run Python File；或命令行 `python verify.py`。
 
-脚本会自动完成：检查依赖 → 启动 `mock_server.py` → 跑全量用例 → 核对冒烟标签筛选 → 检查 `run_result` 表 → 清理运行产物 → 打印结果。最后出现 **`RESULT: PASS - everything works`** 就说明项目运行正常，不需要自己开两个终端，也不用 `cd` 到任何目录。
+**不需要 pip、不需要安装任何第三方包，任何 Python 3.x 都能跑。** 脚本只用标准库完成：启动 `mock_server.py` → 用 `urllib` 执行 6 条核心接口场景并断言 → 把结果写进项目同一张 `run_result` 表 → 清理产物 → 打印结果。看到 **`RESULT: PASS - everything works`** 就是运行正常，不用开两个终端，也不用手动 `cd`。
+
+如果当前解释器恰好装了 `pytest / requests / PyYAML`，脚本会额外跑完整的 12 条用例，结果显示 `core checks + full 12-case suite`；没装则显示 `SKIPPED`，**但不影响 PASS**。这就避开了「VS Code 选中的是另一个没装 pip 的 Python」这类环境问题。脚本也不调用 `sys.exit()`，调试器不会再弹 `SystemExit` 异常。
 
 > 常见误操作：在别的目录直接执行 `python mock_server.py` 会报 `No such file or directory`；把说明文字（`#` 开头的注释）一起复制进命令行会让 pytest 报 `file or directory not found: #`。用 `verify.bat` 可以完全避开这两个问题。
 
