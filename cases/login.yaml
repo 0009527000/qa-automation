@@ -1,0 +1,40 @@
+cases:
+  - id: TC_LOGIN_001
+    name: 正确账号密码登录
+    method: POST
+    path: /api/login
+    body: {username: test01, password: "123456"}
+    expect: {status: 200, json: {code: 0}}
+    tags: [smoke, regression]
+
+  - id: TC_LOGIN_002
+    name: 密码为空
+    method: POST
+    path: /api/login
+    body: {username: test01, password: ""}
+    expect: {status: 400, json: {code: 1001}}
+    tags: [regression]
+
+  - id: TC_LOGIN_003
+    name: 密码错误
+    method: POST
+    path: /api/login
+    body: {username: test01, password: wrong}
+    expect: {status: 401, json: {code: 1002}}
+    tags: [regression]
+
+  - id: TC_LOGIN_004
+    name: 用户名超长（边界值 33 位）
+    method: POST
+    path: /api/login
+    body: {username: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", password: "123456"}
+    expect: {status: 400, json: {code: 1003}}
+    tags: [regression]
+
+  - id: TC_LOGIN_005
+    name: 缺少用户名字段
+    method: POST
+    path: /api/login
+    body: {password: "123456"}
+    expect: {status: 400, json: {code: 1001}}
+    tags: [regression]

@@ -1,0 +1,57 @@
+cases:
+  - id: TC_QUERY_001
+    name: 正常关键词查询
+    method: GET
+    path: /api/query
+    params: {keyword: 软件}
+    expect: {status: 200, json: {code: 0}, data_not_empty: true}
+    tags: [smoke, regression]
+
+  - id: TC_QUERY_002
+    name: keyword 为空
+    method: GET
+    path: /api/query
+    params: {keyword: ""}
+    expect: {status: 400, json: {code: 2001}}
+    tags: [regression]
+
+  - id: TC_QUERY_003
+    name: keyword 超长（边界值 51 位）
+    method: GET
+    path: /api/query
+    params: {keyword: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+    expect: {status: 400, json: {code: 2002}}
+    tags: [regression]
+
+  - id: TC_ORDER_001
+    name: 正常提交订单
+    method: POST
+    path: /api/order
+    body: {itemId: 1, quantity: 2}
+    expect: {status: 200, json: {code: 0}}
+    tags: [smoke, regression]
+
+  - id: TC_ORDER_002
+    name: 数量为 0（边界值）
+    method: POST
+    path: /api/order
+    body: {itemId: 1, quantity: 0}
+    expect: {status: 400, json: {code: 3001}}
+    tags: [regression]
+
+  - id: TC_ORDER_003
+    name: 数量超上限（边界值 100）
+    method: POST
+    path: /api/order
+    body: {itemId: 1, quantity: 100}
+    expect: {status: 400, json: {code: 3002}}
+    tags: [regression]
+
+  - id: TC_ORDER_004
+    name: 未登录提交订单
+    method: POST
+    path: /api/order
+    headers: {X-Token: ""}
+    body: {itemId: 1, quantity: 1}
+    expect: {status: 401, json: {code: 1004}}
+    tags: [regression]

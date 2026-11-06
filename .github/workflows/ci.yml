@@ -1,0 +1,37 @@
+name: api-regression
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # 每天 UTC 02:00 定时回归
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Start mock server
+        run: |
+          python mock_server.py > server.log 2>&1 &
+          sleep 2
+
+      - name: Run regression
+        run: pytest -m "smoke or regression" --alluredir=allure-results
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
