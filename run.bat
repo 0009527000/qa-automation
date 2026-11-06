@@ -1,0 +1,22 @@
+@echo off
+chcp 65001 >nul
+cd /d "%~dp0"
+echo ==========================================
+echo   qa-automation : run all test cases
+echo   No pip / pytest / third-party packages needed
+echo ==========================================
+echo.
+where python >nul 2>&1
+if errorlevel 1 (
+  echo Python was not found in PATH.
+  echo Install Python 3 and tick "Add python.exe to PATH" during setup.
+  pause
+  exit /b 1
+)
+python runner.py
+echo.
+echo ---------------- history summary ----------------
+python report.py
+echo.
+echo Window stays open so you can read the result.
+pause

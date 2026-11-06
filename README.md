@@ -33,7 +33,12 @@ python runner.py --tag regression
 
 **不需要 pip install，任何 Python 3.x 都能跑**：用例解析用自带的极简 YAML 解析器（`common/miniyaml.py`），HTTP 请求用标准库 `urllib`，结果写 SQLite。脚本会自动拉起 `mock_server.py`（已在运行就直接复用），跑完自动关掉。
 
-Windows 也可以直接双击 `verify.bat`（= `python verify.py`）。
+Windows 用户还可以**直接双击**：
+
+| 文件 | 作用 |
+| --- | --- |
+| `run.bat` | 跑全部用例 + 打印历史统计（日常用得最多） |
+| `verify.bat` | 一键自检，等于 `python verify.py` |
 
 ### 方式 B：pytest（想用成熟框架 / Allure 报告时）
 
