@@ -44,6 +44,14 @@ allure serve allure-results
 
 `BASE_URL` 默认是 `http://127.0.0.1:8000`，可用环境变量覆盖指向你自己的被测系统。
 
+### 一键自检（不想敲命令就用这个）
+
+**Windows：直接双击 `verify.bat`**；其他系统或命令行执行 `python verify.py`。
+
+脚本会自动完成：检查依赖 → 启动 `mock_server.py` → 跑全量用例 → 核对冒烟标签筛选 → 检查 `run_result` 表 → 清理运行产物 → 打印结果。最后出现 **`RESULT: PASS - everything works`** 就说明项目运行正常，不需要自己开两个终端，也不用 `cd` 到任何目录。
+
+> 常见误操作：在别的目录直接执行 `python mock_server.py` 会报 `No such file or directory`；把说明文字（`#` 开头的注释）一起复制进命令行会让 pytest 报 `file or directory not found: #`。用 `verify.bat` 可以完全避开这两个问题。
+
 ## 三、目录结构
 
 ```
@@ -67,6 +75,8 @@ qa-automation/
 │   └── review.md           # 人工评审记录表（模板，数据待填）
 ├── perf/README.md          # 压测与慢 SQL 定位的操作指引（模板，数据待填）
 ├── .github/workflows/ci.yml# push + 每日定时回归，上传报告
+├── verify.py               # 一键自检脚本
+├── verify.bat              # Windows 双击运行（调用 verify.py）
 ├── pytest.ini
 └── requirements.txt
 ```
