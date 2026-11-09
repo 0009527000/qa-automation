@@ -174,9 +174,9 @@ def _print_results(results, stats):
             round(stats["elapsed_ms"] / 1000.0, 2)))
 
 
-def _write_markdown(results, stats, tag, batch=""):
+def _write_markdown(results, stats, tag, batch="", name="run_report.md"):
     os.makedirs(os.path.join(ROOT, "reports"), exist_ok=True)
-    path = os.path.join(ROOT, "reports", "run_report.md")
+    path = os.path.join(ROOT, "reports", name)
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     lines = [
         "# 用例执行报告",
@@ -206,10 +206,18 @@ def _write_markdown(results, stats, tag, batch=""):
     return path
 
 
-def run_all(tag=None, auto_server=True, verbose=True):
-    """执行用例并返回 (results, stats)。供 runner.py / verify.py 共用。"""
+def run_all(tag=None, auto_server=True, verbose=True, only=None):
+    """执行用例并返回 (results, stats)。供 runner.py / verify.py 共用。
+
+    only: 逗号分隔的用例编号，只跑这几条（调试单条用例时用，省去跑全量）。
+    """
     all_cases = case_loader.load_cases()
     selected = case_loader.filter_by_tag(all_cases, tag)
+    if only:
+        wanted = {item.strip().upper() for item in str(only).split(",") if item.strip()}
+        selected = [c for c in selected if str(c["id"]).upper() in wanted]
+        if not selected:
+            raise SystemExit("没有匹配 --case %s 的用例，先 python report.py 看有哪些编号" % only)
     if not selected:
         raise SystemExit("没有匹配 --tag %s 的用例" % tag)
 
@@ -221,7 +229,8 @@ def run_all(tag=None, auto_server=True, verbose=True):
         print()
         print("批次 %s" % batch)
         print("执行 %d 条用例（共 %d 条，范围：%s）" % (
-            len(selected), len(all_cases), tag or "全部"))
+            len(selected), len(all_cases),
+            "用例 %s" % only if only else (tag or "全部")))
     try:
         results = [_run_one(case, batch) for case in selected]
     finally:
@@ -235,7 +244,9 @@ def run_all(tag=None, auto_server=True, verbose=True):
     stats = _stats(results)
     if verbose:
         _print_results(results, stats)
-        path = _write_markdown(results, stats, tag, batch)
+        # 单条调试单独出文件，避免把全量报告覆盖成一条
+        path = _write_markdown(results, stats, tag, batch,
+                               name="run_report_case.md" if only else "run_report.md")
         print("报告已写入：%s" % path)
         print("结果已写入数据库：%s（run_result / test_case）" % os.path.abspath(db.config.DB_PATH))
     return results, stats
@@ -244,6 +255,7 @@ def run_all(tag=None, auto_server=True, verbose=True):
 def main(argv=None):
     parser = argparse.ArgumentParser(description="零依赖用例执行器")
     parser.add_argument("--tag", help="只跑带该标签的用例，如 smoke / regression")
+    parser.add_argument("--case", help="只跑指定用例，多个用逗号分隔，如 TC_ORDER_002,TC_LOGIN_001")
     parser.add_argument("--no-server", action="store_true", help="不自动启动 mock 被测服务")
     args = parser.parse_args(argv)
 
@@ -251,7 +263,7 @@ def main(argv=None):
     print(" qa-automation 用例执行器   Python %s" % sys.version.split()[0])
     print(BAR)
 
-    results, stats = run_all(tag=args.tag, auto_server=not args.no_server)
+    results, stats = run_all(tag=args.tag, auto_server=not args.no_server, only=args.case)
     ok = stats["failed"] == 0
     print()
     print("RESULT: %s - %d/%d passed" % ("PASS" if ok else "FAIL", stats["passed"], stats["total"]))

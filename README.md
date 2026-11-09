@@ -75,6 +75,7 @@ python launcher.py            # 推荐：先体检再跑，报错是中文的人
 python runner.py                # 跑全部 60 条用例
 python runner.py --tag smoke    # 只跑冒烟
 python runner.py --tag regression
+python runner.py --case TC_ORDER_002,TC_LOGIN_018   # 只跑指定用例，调用例时用
 python htmlreport.py            # 生成 reports/report.html（单页报告，可打印成 PDF）
 ```
 
