@@ -16,7 +16,7 @@ import argparse
 import os
 import sys
 import webbrowser
-from datetime import datetime, timedelta
+from datetime import datetime
 from string import Template
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -24,6 +24,7 @@ os.chdir(ROOT)
 sys.path.insert(0, ROOT)
 
 from common import config, db  # noqa: E402
+from common.stats import p95  # noqa: E402
 
 if hasattr(sys.stdout, "reconfigure"):
     try:
@@ -38,13 +39,6 @@ def _esc(text):
     return (str(text if text is not None else "")
             .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             .replace('"', "&quot;"))
-
-
-def _p95(values):
-    if not values:
-        return 0
-    ordered = sorted(values)
-    return ordered[min(len(ordered) - 1, int(round(0.95 * (len(ordered) - 1))))]
 
 
 def collect():
@@ -78,18 +72,6 @@ def collect():
         item["total"] += 1
         item["passed"] += 1 if r[1] == "passed" else 0
 
-    trend = []
-    today = datetime.now().date()
-    for offset in range(6, -1, -1):
-        day = today - timedelta(days=offset)
-        key = day.strftime("%Y-%m-%d")
-        day_rows = [r for r in rows if str(r[5]).startswith(key)]
-        trend.append({
-            "label": day.strftime("%m-%d"),
-            "total": len(day_rows),
-            "passed": sum(1 for r in day_rows if r[1] == "passed"),
-        })
-
     # 本轮耗时分布：比「按天执行量」更能说明响应表现
     edges = [(0, 5, "<5ms"), (5, 10, "5–10ms"), (10, 20, "10–20ms"),
              (20, 50, "20–50ms"), (50, 10 ** 9, "≥50ms")]
@@ -107,11 +89,10 @@ def collect():
         "passed": passed,
         "total": len(latest_rows),
         "avg": round(sum(costs) / len(costs), 1) if costs else 0,
-        "p95": _p95(costs),
+        "p95": p95(costs),
         "max": max(costs) if costs else 0,
         "elapsed": round(sum(costs) / 1000.0, 2),
         "runs": len(batches),
-        "trend": trend,
         "buckets": buckets,
         "generated": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "base_url": config.BASE_URL,

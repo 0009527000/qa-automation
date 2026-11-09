@@ -28,7 +28,9 @@ sys.path.insert(0, ROOT)
 
 from common import cases as case_loader  # noqa: E402
 from common import db  # noqa: E402
+from common.checks import check_case, parse_json  # noqa: E402
 from common.config import API_TOKEN, BASE_URL, REQUEST_TIMEOUT  # noqa: E402
+from common.stats import percentile  # noqa: E402
 
 if hasattr(sys.stdout, "reconfigure"):
     try:
@@ -68,25 +70,12 @@ def _request(case):
     return status, text, payload
 
 
-def _check(case, status, text, payload):
-    """断言；不符合预期就抛 AssertionError，消息里带足排查信息。"""
-    expect = case["expect"]
-    assert status == expect["status"], "%s 期望 HTTP %s，实际 %s，响应：%s" % (
-        case["id"], expect["status"], status, text[:200])
-    for key, want in (expect.get("json") or {}).items():
-        got = payload.get(key)
-        assert got == want, "%s 字段 %s 期望 %r，实际 %r" % (case["id"], key, want, got)
-    if expect.get("data_not_empty"):
-        assert payload.get("data"), "%s 期望 data 非空，实际 %r" % (
-            case["id"], payload.get("data"))
-
-
 def _run_one(case, batch=""):
     start = time.perf_counter()
     status_code = 0
     try:
         status_code, text, payload = _request(case)
-        _check(case, status_code, text, payload)
+        check_case(case, status_code, text, payload)
         status, message = "passed", ""
     except Exception as exc:
         status, message = "failed", "%s: %s" % (type(exc).__name__, exc)
@@ -140,7 +129,7 @@ def _stats(results):
     passed = sum(1 for r in results if r["status"] == "passed")
     costs = sorted(r["cost_ms"] for r in results)
     avg = round(sum(costs) / total, 1) if total else 0
-    p95 = costs[min(total - 1, int(round(0.95 * (total - 1))))] if total else 0
+    p95 = percentile(costs, 0.95)
     return {
         "total": total,
         "passed": passed,
@@ -263,7 +252,7 @@ def main(argv=None):
     print(" qa-automation 用例执行器   Python %s" % sys.version.split()[0])
     print(BAR)
 
-    results, stats = run_all(tag=args.tag, auto_server=not args.no_server, only=args.case)
+    _, stats = run_all(tag=args.tag, auto_server=not args.no_server, only=args.case)
     ok = stats["failed"] == 0
     print()
     print("RESULT: %s - %d/%d passed" % ("PASS" if ok else "FAIL", stats["passed"], stats["total"]))

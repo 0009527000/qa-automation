@@ -169,6 +169,8 @@ qa-automation/
 │   └── order.yaml
 ├── common/
 │   ├── config.py           # BASE_URL / token / 数据库配置（读环境变量）
+│   ├── checks.py           # 用例断言（runner 与 pytest 共用一份口径）
+│   ├── stats.py            # 百分位计算（P95 只有一处实现）
 │   ├── cases.py            # 用例加载（优先 PyYAML，缺失时用 miniyaml）
 │   ├── miniyaml.py         # 极简 YAML 解析器，让用例在无依赖环境也能跑
 │   ├── http_client.py      # pytest 通道的 requests 封装

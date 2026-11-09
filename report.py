@@ -18,6 +18,7 @@ os.chdir(ROOT)
 sys.path.insert(0, ROOT)
 
 from common import db  # noqa: E402
+from common.stats import percentile  # noqa: E402
 
 if hasattr(sys.stdout, "reconfigure"):
     try:
@@ -26,14 +27,6 @@ if hasattr(sys.stdout, "reconfigure"):
         pass
 
 BAR = "=" * 62
-
-
-def _pct(values, ratio):
-    if not values:
-        return 0
-    ordered = sorted(values)
-    idx = min(len(ordered) - 1, int(round(ratio * (len(ordered) - 1))))
-    return ordered[idx]
 
 
 def collect():
@@ -97,7 +90,7 @@ def collect():
         "failed": total - status_rows.get("passed", 0),
         "rate": round(status_rows.get("passed", 0) * 100.0 / total, 1),
         "avg": round(sum(costs) / len(costs), 1),
-        "p95": _pct(costs, 0.95),
+        "p95": percentile(costs, 0.95),
         "max": max(costs) if costs else 0,
         "latest_at": latest_at,
         "latest_batch": latest_batch,
@@ -136,7 +129,7 @@ def _render(data):
         "，平均修复时长 %s 小时" % data["bug_avg_hours"] if data["bug_avg_hours"] else "")]
     if data["failed_rows"]:
         lines += ["", "最近失败（最多 10 条）："]
-        for case_id, status, code, cost, msg, run_at in data["failed_rows"]:
+        for case_id, _status, code, cost, msg, run_at in data["failed_rows"]:
             lines.append("  %s  %s  HTTP %s  %sms  %s" % (
                 run_at, case_id, code, cost, (msg or "")[:80]))
     return lines
@@ -172,7 +165,7 @@ def render_markdown(data):
         out.append("| %s | %d | %d |" % (day, count, passed))
     if data["failed_rows"]:
         out += ["", "## 最近失败", "", "| 时间 | 用例 | 状态码 | 耗时 | 原因 |", "| --- | --- | --- | --- | --- |"]
-        for case_id, status, code, cost, msg, run_at in data["failed_rows"]:
+        for case_id, _status, code, cost, msg, run_at in data["failed_rows"]:
             out.append("| %s | %s | %s | %sms | %s |" % (
                 run_at, case_id, code, cost, (msg or "").replace("|", "\\|")[:80]))
     return "\n".join(out) + "\n"
