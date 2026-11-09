@@ -1,0 +1,8 @@
+{
+  // 打开这个文件夹时 VS Code 会提示安装这两个扩展；装了才能按 F5 调试。
+  // 不装也能跑：Ctrl+Shift+B 走批处理，或用任务栏里的 ① 运行全部用例。
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.debugpy"
+  ]
+}

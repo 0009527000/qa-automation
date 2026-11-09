@@ -1,4 +1,5 @@
 cases:
+  # ---------- 正向用例 ----------
   - id: TC_ORDER_001
     name: 正常提交订单
     method: POST
@@ -7,6 +8,31 @@ cases:
     expect: {status: 200, json: {code: 0}}
     tags: [smoke, regression]
 
+  - id: TC_ORDER_005
+    name: 数量为 1（最小合法值）
+    method: POST
+    path: /api/order
+    body: {itemId: 1, quantity: 1}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_ORDER_006
+    name: 数量为 99（上限边界内）
+    method: POST
+    path: /api/order
+    body: {itemId: 1, quantity: 99}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_ORDER_019
+    name: 下单成功返回订单号
+    method: POST
+    path: /api/order
+    body: {itemId: 2, quantity: 3}
+    expect: {status: 200, json: {code: 0, orderId: 10001}}
+    tags: [smoke, regression]
+
+  # ---------- 数量边界 ----------
   - id: TC_ORDER_002
     name: 数量为 0（边界值）
     method: POST
@@ -23,6 +49,72 @@ cases:
     expect: {status: 400, json: {code: 3002}}
     tags: [regression]
 
+  - id: TC_ORDER_007
+    name: 数量为 -1（负数边界）
+    method: POST
+    path: /api/order
+    body: {itemId: 1, quantity: -1}
+    expect: {status: 400, json: {code: 3001}}
+    tags: [regression]
+
+  - id: TC_ORDER_008
+    name: 数量为 10000（远超上限）
+    method: POST
+    path: /api/order
+    body: {itemId: 1, quantity: 10000}
+    expect: {status: 400, json: {code: 3002}}
+    tags: [regression]
+
+  # ---------- 参数类型与缺失 ----------
+  - id: TC_ORDER_009
+    name: 数量为字符串 5（类型不合法）
+    method: POST
+    path: /api/order
+    body: {itemId: 1, quantity: "5"}
+    expect: {status: 400, json: {code: 3001}}
+    tags: [regression]
+
+  - id: TC_ORDER_010
+    name: 数量为小数 2.5（类型不合法）
+    method: POST
+    path: /api/order
+    body: {itemId: 1, quantity: 2.5}
+    expect: {status: 400, json: {code: 3001}}
+    tags: [regression]
+
+  - id: TC_ORDER_011
+    name: 数量为 null
+    method: POST
+    path: /api/order
+    body: {itemId: 1, quantity: null}
+    expect: {status: 400, json: {code: 3001}}
+    tags: [regression]
+
+  - id: TC_ORDER_012
+    name: 缺少 quantity 字段
+    method: POST
+    path: /api/order
+    body: {itemId: 1}
+    expect: {status: 400, json: {code: 3001}}
+    tags: [regression]
+
+  - id: TC_ORDER_013
+    name: 空请求体
+    method: POST
+    path: /api/order
+    body: {}
+    expect: {status: 400, json: {code: 3001}}
+    tags: [regression]
+
+  - id: TC_ORDER_020
+    name: 数量为布尔 true（应属类型非法）
+    method: POST
+    path: /api/order
+    body: {itemId: 1, quantity: true}
+    expect: {status: 400, json: {code: 3001}}
+    tags: [regression]
+
+  # ---------- 鉴权 ----------
   - id: TC_ORDER_004
     name: 未登录提交订单
     method: POST
@@ -30,4 +122,47 @@ cases:
     headers: {X-Token: ""}
     body: {itemId: 1, quantity: 1}
     expect: {status: 401, json: {code: 1004}}
+    tags: [regression]
+
+  - id: TC_ORDER_014
+    name: token 错误
+    method: POST
+    path: /api/order
+    headers: {X-Token: wrong-token}
+    body: {itemId: 1, quantity: 1}
+    expect: {status: 401, json: {code: 1004}}
+    tags: [regression]
+
+  - id: TC_ORDER_015
+    name: token 大小写不匹配
+    method: POST
+    path: /api/order
+    headers: {X-Token: DEMO-TOKEN}
+    body: {itemId: 1, quantity: 1}
+    expect: {status: 401, json: {code: 1004}}
+    tags: [regression]
+
+  - id: TC_ORDER_016
+    name: 未登录且数量非法（先校验鉴权）
+    method: POST
+    path: /api/order
+    headers: {X-Token: ""}
+    body: {itemId: 1, quantity: 0}
+    expect: {status: 401, json: {code: 1004}}
+    tags: [regression]
+
+  # ---------- 接口契约 ----------
+  - id: TC_ORDER_017
+    name: 多余字段被忽略
+    method: POST
+    path: /api/order
+    body: {itemId: 1, quantity: 1, note: test, price: 9.9, extra: abc}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_ORDER_018
+    name: 用 GET 访问订单接口（方法不支持，应 405）
+    method: GET
+    path: /api/order
+    expect: {status: 405, json: {code: 405}}
     tags: [regression]

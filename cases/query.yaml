@@ -1,4 +1,5 @@
 cases:
+  # ---------- 正向用例 ----------
   - id: TC_QUERY_001
     name: 正常关键词查询
     method: GET
@@ -7,11 +8,75 @@ cases:
     expect: {status: 200, json: {code: 0}, data_not_empty: true}
     tags: [smoke, regression]
 
+  - id: TC_QUERY_004
+    name: 关键词为 1 位（最短有效值）
+    method: GET
+    path: /api/query
+    params: {keyword: J}
+    expect: {status: 200, json: {code: 0}, data_not_empty: true}
+    tags: [regression]
+
+  - id: TC_QUERY_005
+    name: 关键词为 50 位（长度边界内）
+    method: GET
+    path: /api/query
+    params: {keyword: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_QUERY_006
+    name: 中文关键词模糊匹配
+    method: GET
+    path: /api/query
+    params: {keyword: 测试}
+    expect: {status: 200, json: {code: 0}, data_not_empty: true}
+    tags: [regression]
+
+  - id: TC_QUERY_007
+    name: 关键词小写 python（大小写敏感，无匹配）
+    method: GET
+    path: /api/query
+    params: {keyword: python}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_QUERY_008
+    name: 关键词为纯空格（非空但无匹配）
+    method: GET
+    path: /api/query
+    params: {keyword: " "}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_QUERY_009
+    name: 关键词为全角空格
+    method: GET
+    path: /api/query
+    params: {keyword: "　"}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_QUERY_020
+    name: 关键词含空格的中文短语
+    method: GET
+    path: /api/query
+    params: {keyword: "软件 测试"}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  # ---------- 参数校验 ----------
   - id: TC_QUERY_002
     name: keyword 为空
     method: GET
     path: /api/query
     params: {keyword: ""}
+    expect: {status: 400, json: {code: 2001}}
+    tags: [regression]
+
+  - id: TC_QUERY_011
+    name: 缺少 keyword 参数
+    method: GET
+    path: /api/query
     expect: {status: 400, json: {code: 2001}}
     tags: [regression]
 
@@ -21,4 +86,77 @@ cases:
     path: /api/query
     params: {keyword: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
     expect: {status: 400, json: {code: 2002}}
+    tags: [regression]
+
+  - id: TC_QUERY_010
+    name: keyword 超长 100 位
+    method: GET
+    path: /api/query
+    params: {keyword: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+    expect: {status: 400, json: {code: 2002}}
+    tags: [regression]
+
+  # ---------- 输入健壮性 ----------
+  - id: TC_QUERY_012
+    name: 关键词含 SQL 注入片段
+    method: GET
+    path: /api/query
+    params: {keyword: "' OR 1=1 --"}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_QUERY_013
+    name: 关键词含 XSS 脚本
+    method: GET
+    path: /api/query
+    params: {keyword: "<script>alert(1)</script>"}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_QUERY_014
+    name: 关键词为纯数字
+    method: GET
+    path: /api/query
+    params: {keyword: "1"}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_QUERY_015
+    name: 关键词为百分号（URL 编码处理）
+    method: GET
+    path: /api/query
+    params: {keyword: "%"}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_QUERY_018
+    name: 关键词含与号（URL 编码处理）
+    method: GET
+    path: /api/query
+    params: {keyword: "a&b"}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_QUERY_019
+    name: 关键词含加号（URL 编码处理）
+    method: GET
+    path: /api/query
+    params: {keyword: "a+b"}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  # ---------- 接口契约 ----------
+  - id: TC_QUERY_016
+    name: 访问不存在的接口
+    method: GET
+    path: /api/notfound
+    expect: {status: 404, json: {code: 404}}
+    tags: [regression]
+
+  - id: TC_QUERY_017
+    name: 用 POST 访问查询接口（方法不支持，应 405）
+    method: POST
+    path: /api/query
+    body: {keyword: 软件}
+    expect: {status: 405, json: {code: 405}}
     tags: [regression]

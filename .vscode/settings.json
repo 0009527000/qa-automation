@@ -1,0 +1,14 @@
+{
+  // 统一 UTF-8，避免中文用例名/输出在 Windows 上变乱码
+  "files.encoding": "utf8",
+  "terminal.integrated.env.windows": {
+    "PYTHONUTF8": "1",
+    "PYTHONIOENCODING": "utf-8"
+  },
+  // 让 import common / runner 这类同目录导入能被 Pylance 识别
+  "python.analysis.extraPaths": ["${workspaceFolder}"],
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true
+  }
+}

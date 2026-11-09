@@ -1,4 +1,5 @@
 cases:
+  # ---------- 正向用例 ----------
   - id: TC_LOGIN_001
     name: 正确账号密码登录
     method: POST
@@ -7,6 +8,15 @@ cases:
     expect: {status: 200, json: {code: 0}}
     tags: [smoke, regression]
 
+  - id: TC_LOGIN_006
+    name: 登录成功返回固定 token
+    method: POST
+    path: /api/login
+    body: {username: test01, password: "123456"}
+    expect: {status: 200, json: {code: 0, token: demo-token}}
+    tags: [smoke, regression]
+
+  # ---------- 必填校验 ----------
   - id: TC_LOGIN_002
     name: 密码为空
     method: POST
@@ -15,14 +25,55 @@ cases:
     expect: {status: 400, json: {code: 1001}}
     tags: [regression]
 
-  - id: TC_LOGIN_003
-    name: 密码错误
+  - id: TC_LOGIN_005
+    name: 缺少用户名字段
     method: POST
     path: /api/login
-    body: {username: test01, password: wrong}
-    expect: {status: 401, json: {code: 1002}}
+    body: {password: "123456"}
+    expect: {status: 400, json: {code: 1001}}
     tags: [regression]
 
+  - id: TC_LOGIN_007
+    name: 缺少密码字段
+    method: POST
+    path: /api/login
+    body: {username: test01}
+    expect: {status: 400, json: {code: 1001}}
+    tags: [regression]
+
+  - id: TC_LOGIN_008
+    name: 用户名为空字符串
+    method: POST
+    path: /api/login
+    body: {username: "", password: "123456"}
+    expect: {status: 400, json: {code: 1001}}
+    tags: [regression]
+
+  - id: TC_LOGIN_009
+    name: 用户名为 null
+    method: POST
+    path: /api/login
+    body: {username: null, password: "123456"}
+    expect: {status: 400, json: {code: 1001}}
+    tags: [regression]
+
+  - id: TC_LOGIN_010
+    name: 密码为 null
+    method: POST
+    path: /api/login
+    body: {username: test01, password: null}
+    expect: {status: 400, json: {code: 1001}}
+    tags: [regression]
+
+  - id: TC_LOGIN_011
+    name: 空请求体
+    method: POST
+    path: /api/login
+    body: {}
+    expect: {status: 400, json: {code: 1001}}
+    tags: [regression]
+
+  # ---------- 用户名长度边界 ----------
   - id: TC_LOGIN_004
     name: 用户名超长（边界值 33 位）
     method: POST
@@ -31,10 +82,84 @@ cases:
     expect: {status: 400, json: {code: 1003}}
     tags: [regression]
 
-  - id: TC_LOGIN_005
-    name: 缺少用户名字段
+  - id: TC_LOGIN_012
+    name: 用户名含中文
     method: POST
     path: /api/login
-    body: {password: "123456"}
-    expect: {status: 400, json: {code: 1001}}
+    body: {username: 测试用户, password: "123456"}
+    expect: {status: 401, json: {code: 1002}}
+    tags: [regression]
+
+  - id: TC_LOGIN_013
+    name: 用户名 32 位（长度边界内，非注册账号）
+    method: POST
+    path: /api/login
+    body: {username: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", password: "123456"}
+    expect: {status: 401, json: {code: 1002}}
+    tags: [regression]
+
+  - id: TC_LOGIN_014
+    name: 用户名 31 位（长度边界内，非注册账号）
+    method: POST
+    path: /api/login
+    body: {username: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", password: "123456"}
+    expect: {status: 401, json: {code: 1002}}
+    tags: [regression]
+
+  # ---------- 凭证校验 ----------
+  - id: TC_LOGIN_003
+    name: 密码错误
+    method: POST
+    path: /api/login
+    body: {username: test01, password: wrong}
+    expect: {status: 401, json: {code: 1002}}
+    tags: [regression]
+
+  - id: TC_LOGIN_015
+    name: 密码为纯空格（非空但错误）
+    method: POST
+    path: /api/login
+    body: {username: test01, password: "   "}
+    expect: {status: 401, json: {code: 1002}}
+    tags: [regression]
+
+  - id: TC_LOGIN_016
+    name: 密码为数字类型
+    method: POST
+    path: /api/login
+    body: {username: test01, password: 123456}
+    expect: {status: 401, json: {code: 1002}}
+    tags: [regression]
+
+  - id: TC_LOGIN_017
+    name: 密码超长 200 位
+    method: POST
+    path: /api/login
+    body: {username: test01, password: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}
+    expect: {status: 401, json: {code: 1002}}
+    tags: [regression]
+
+  # ---------- 输入健壮性 ----------
+  - id: TC_LOGIN_018
+    name: 用户名前后带空格（应 trim 后登录成功）
+    method: POST
+    path: /api/login
+    body: {username: " test01 ", password: "123456"}
+    expect: {status: 200, json: {code: 0}}
+    tags: [regression]
+
+  - id: TC_LOGIN_019
+    name: 用户名大小写不匹配
+    method: POST
+    path: /api/login
+    body: {username: TEST01, password: "123456"}
+    expect: {status: 401, json: {code: 1002}}
+    tags: [regression]
+
+  - id: TC_LOGIN_020
+    name: 用户名含 SQL 注入字符
+    method: POST
+    path: /api/login
+    body: {username: "' OR 1=1 --", password: "123456"}
+    expect: {status: 401, json: {code: 1002}}
     tags: [regression]

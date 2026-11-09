@@ -48,6 +48,15 @@ def main():
     else:
         print("RESULT: FAIL - %d/%d 通过，请查看上面的失败详情" % (
             stats["passed"], stats["total"]))
+
+    # 顺手出一份可视化报告，面试/周报直接用
+    try:
+        import htmlreport
+        print()
+        htmlreport.main([])
+    except Exception as exc:  # 报告失败不影响用例结论
+        print("HTML 报告生成失败（不影响用例结果）：%s" % exc)
+
     print(BAR)
     # 不用 sys.exit：VS Code 调试器会把 SystemExit 当成异常抛出来
     return ok

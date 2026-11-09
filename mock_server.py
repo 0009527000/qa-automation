@@ -45,6 +45,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/login":
             username = data.get("username")
             password = data.get("password")
+            # BUG-0003 修复：用户名前后空格先 trim，避免正确账号因空格被判失败
+            if isinstance(username, str):
+                username = username.strip()
             if not username or not password:
                 return self._send(400, {"code": 1001, "msg": "用户名或密码为空"})
             if len(str(username)) > 32:
@@ -57,11 +60,16 @@ class Handler(BaseHTTPRequestHandler):
             if self.headers.get("X-Token") != "demo-token":
                 return self._send(401, {"code": 1004, "msg": "未登录"})
             qty = data.get("quantity")
-            if not isinstance(qty, int) or qty <= 0:
+            # BUG-0001 修复：bool 是 int 的子类，必须显式排除，否则 true 会被当成 1
+            if isinstance(qty, bool) or not isinstance(qty, int) or qty <= 0:
                 return self._send(400, {"code": 3001, "msg": "数量非法"})
             if qty > 99:
                 return self._send(400, {"code": 3002, "msg": "数量超出上限"})
             return self._send(200, {"code": 0, "msg": "ok", "orderId": 10001})
+
+        # BUG-0002 修复：路径存在但方法不对，应返回 405 而不是 404
+        if path == "/api/query":
+            return self._send(405, {"code": 405, "msg": "方法不支持，请用 GET"})
 
         return self._send(404, {"code": 404, "msg": "not found"})
 
@@ -79,6 +87,10 @@ class Handler(BaseHTTPRequestHandler):
                 time.sleep(0.25)
             found = [item for item in ITEMS if keyword in item["name"]]
             return self._send(200, {"code": 0, "data": found, "total": len(found)})
+
+        # BUG-0002 修复：订单接口只接受 POST，GET 属于方法不支持
+        if parsed.path == "/api/order":
+            return self._send(405, {"code": 405, "msg": "方法不支持，请用 POST"})
 
         return self._send(404, {"code": 404, "msg": "not found"})
 

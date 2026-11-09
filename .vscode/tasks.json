@@ -2,39 +2,91 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "运行全部用例",
-      "type": "shell",
-      "command": "python runner.py",
-      "options": { "cwd": "${workspaceFolder}" },
+      "label": "① 运行全部用例（推荐）",
+      "detail": "run.bat -> launcher.py -> runner.py，零第三方依赖",
+      "type": "process",
+      "command": "cmd",
+      "args": ["/c", "run.bat"],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": { "QA_NO_PAUSE": "1", "PYTHONUTF8": "1" }
+      },
       "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true, "focus": true },
       "problemMatcher": []
     },
     {
-      "label": "只跑冒烟用例",
-      "type": "shell",
-      "command": "python runner.py --tag smoke",
-      "options": { "cwd": "${workspaceFolder}" },
+      "label": "② 只跑冒烟用例",
+      "type": "process",
+      "command": "cmd",
+      "args": ["/c", "run.bat", "--tag", "smoke"],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": { "QA_NO_PAUSE": "1", "PYTHONUTF8": "1" }
+      },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
       "problemMatcher": []
     },
     {
-      "label": "一键自检",
-      "type": "shell",
-      "command": "python verify.py",
-      "options": { "cwd": "${workspaceFolder}" },
+      "label": "③ 一键自检（跑用例 + 历史统计）",
+      "type": "process",
+      "command": "cmd",
+      "args": ["/c", "verify.bat"],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": { "QA_NO_PAUSE": "1", "PYTHONUTF8": "1" }
+      },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
       "problemMatcher": []
     },
     {
-      "label": "查看执行统计",
-      "type": "shell",
-      "command": "python report.py --md",
-      "options": { "cwd": "${workspaceFolder}" },
+      "label": "④ 环境体检（跑不动先点这个）",
+      "detail": "检查 Python / 端口 8000 / 数据库是否可用，不跑用例",
+      "type": "process",
+      "command": "cmd",
+      "args": ["/c", "run.bat", "check"],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": { "QA_NO_PAUSE": "1", "PYTHONUTF8": "1" }
+      },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
       "problemMatcher": []
     },
     {
-      "label": "缺陷台账",
-      "type": "shell",
-      "command": "python buglog.py list",
-      "options": { "cwd": "${workspaceFolder}" },
+      "label": "⑤ 查看执行统计",
+      "type": "process",
+      "command": "cmd",
+      "args": ["/c", "run.bat", "report", "--md"],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": { "QA_NO_PAUSE": "1", "PYTHONUTF8": "1" }
+      },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "⑥ 缺陷台账",
+      "type": "process",
+      "command": "cmd",
+      "args": ["/c", "run.bat", "bugs", "list"],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": { "QA_NO_PAUSE": "1", "PYTHONUTF8": "1" }
+      },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "⑦ 生成 HTML 报告并打开",
+      "detail": "reports/report.html，浏览器可 Ctrl+P 存成 PDF",
+      "type": "process",
+      "command": "cmd",
+      "args": ["/c", "run.bat", "html", "--open"],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": { "QA_NO_PAUSE": "1", "PYTHONUTF8": "1" }
+      },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
       "problemMatcher": []
     }
   ]
