@@ -10,7 +10,7 @@ echo   No pip / pytest / third-party packages needed
 echo ==========================================
 echo.
 
-rem ---- 1. 找一个真正能用的 Python（py / python / python3 依次试） ----
+rem ---- 1. pick a working python: py / python / python3 ----
 set "PY="
 for %%C in (py python python3) do (
   if not defined PY (
@@ -31,10 +31,10 @@ if not defined PY (
   exit /b 1
 )
 
-rem ---- 2. 交给 launcher.py：体检 -> 跑用例 -> 人话报错 ----
-rem    run.bat             跑全部用例
-rem    run.bat --tag smoke 只跑冒烟
-rem    run.bat check       只做环境体检，不跑用例
+rem ---- 2. hand over to launcher.py: env check, run, friendly errors ----
+rem    run.bat              run all cases
+rem    run.bat --tag smoke  smoke only
+rem    run.bat check        env check only
 %PY% launcher.py %*
 set "CODE=%ERRORLEVEL%"
 

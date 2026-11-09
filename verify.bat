@@ -10,7 +10,7 @@ echo   No pip / pytest / third-party packages needed
 echo ==========================================
 echo.
 
-rem ---- 1. 找一个真正能用的 Python（py / python / python3 依次试） ----
+rem ---- 1. pick a working python: py / python / python3 ----
 set "PY="
 for %%C in (py python python3) do (
   if not defined PY (
@@ -31,7 +31,7 @@ if not defined PY (
   exit /b 1
 )
 
-rem ---- 2. 交给 launcher.py：体检 -> 跑用例 + 统计 -> 人话报错 ----
+rem ---- 2. hand over to launcher.py: env check, run, stats ----
 %PY% launcher.py verify %*
 set "CODE=%ERRORLEVEL%"
 
